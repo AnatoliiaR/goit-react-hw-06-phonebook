@@ -2,40 +2,32 @@ import style from './App.module.css';
 import Form from './Form';
 import ContactList from './ContactList';
 import Filter from './Filter';
-import useLocalStorage from 'hooks/useLocalStorage';
-
-import { nanoid } from 'nanoid';
+import { useSelector, useDispatch } from 'react-redux';
+import { addContact, deleteContact } from '../redux/contacts/contacts-slice';
+import { setFilter } from '../redux/filter/filter-slice';
+import {
+  getAllContacts,
+  getFilteredContacts,
+} from '../redux/contacts/contacts-selectors';
+import { getFilter } from '../redux/filter/filter-selectors';
 
 export default function App() {
-  const [contacts, setContacts] = useLocalStorage('contacts', []);
-  const [filter, setFilter] = useLocalStorage('filter', '');
+  const contacts = useSelector(getAllContacts);
+  const visibleContacts = useSelector(getFilteredContacts);
+  const filter = useSelector(getFilter);
 
-  const addContact = ({ name, number }) => {
-    const contact = {
-      id: nanoid(),
-      name,
-      number,
-    };
+  const dispatch = useDispatch();
 
-    contacts.some(contact => contact.name === name)
-      ? alert(`${name} is already in contacts.`)
-      : setContacts([...contacts, contact]);
+  const onAddContact = ({ name, number }) => {
+    dispatch(addContact({ name, number }));
   };
 
-  const deleteContact = Id => {
-    setContacts(contacts => contacts.filter(contact => contact.id !== Id));
+  const onDeleteContact = id => {
+    dispatch(deleteContact(id));
   };
 
-  const changeFilter = e => {
-    setFilter(e.currentTarget.value);
-  };
-
-  const getVisibleCintacts = () => {
-    const normalizedFilter = filter.toLowerCase();
-
-    return contacts.filter(contact =>
-      contact.name.toLowerCase().includes(normalizedFilter)
-    );
+  const onChangeFilter = ({ currentTarget }) => {
+    dispatch(setFilter(currentTarget.value));
   };
 
   return (
@@ -45,14 +37,11 @@ export default function App() {
       </h1>
       <div className={style.section}>
         <h2 className={style.subtitle}>Phonebook</h2>
-        <Form onSubmit={addContact} />
+        <Form onSubmit={onAddContact} contacts={contacts} />
+
         <h2 className={style.subtitle}>Contacts</h2>
-        <Filter value={filter} onChange={changeFilter} />
-        <ContactList
-          contacts={getVisibleCintacts()}
-          value={filter}
-          onDelete={deleteContact}
-        />
+        <Filter value={filter} onChange={onChangeFilter} />
+        <ContactList contacts={visibleContacts} onDelete={onDeleteContact} />
       </div>
     </div>
   );

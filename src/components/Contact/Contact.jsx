@@ -3,7 +3,6 @@ import style from './Contact.module.css';
 
 const Contact = ({ name, number, onDelete, id }) => {
   return (
-    // <li className={style.list}>
     <div className={style.list}>
       <div>
         <span className={style.name}>{name}:</span>
@@ -16,7 +15,6 @@ const Contact = ({ name, number, onDelete, id }) => {
       >
         Delete
       </button>
-      {/* </li> */}
     </div>
   );
 };
